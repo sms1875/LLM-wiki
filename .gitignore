@@ -1,0 +1,20 @@
+# macOS / editor
+.DS_Store
+.vscode/
+.idea/
+
+# Python
+__pycache__/
+*.pyc
+
+# Local environment
+.env
+
+# Generated site artifacts
+.site-src/
+site/
+web/
+
+# Generated lint artifacts
+.cache/
+wiki/lint/latest.md
