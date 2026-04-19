@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""Prepare web docs content from repository markdown sources.
+"""Prepare publish-ready docs content from repository markdown sources.
 
-Copies selected markdown trees into `web/` so MkDocs can publish them.
+Copies selected markdown trees into `.site-src/` (ephemeral build directory)
+so MkDocs can publish them without committing generated mirror files.
 """
 
 from __future__ import annotations
@@ -10,7 +11,7 @@ from pathlib import Path
 import shutil
 
 ROOT = Path(__file__).resolve().parents[1]
-WEB = ROOT / "web"
+SITE_SRC = ROOT / ".site-src"
 
 COPY_DIRS = ["wiki", "raw", "docs"]
 COPY_FILES = ["README.md"]
@@ -22,10 +23,6 @@ def reset_target(path: Path) -> None:
             shutil.rmtree(path)
         else:
             path.unlink()
-
-
-def copy_tree(src: Path, dst: Path) -> None:
-    shutil.copytree(src, dst)
 
 
 def write_index() -> None:
@@ -45,26 +42,23 @@ def write_index() -> None:
 3. 사이트 동기화: `python3 scripts/build_site.py`
 4. GitHub Actions가 Pages 배포
 """
-    (WEB / "index.md").write_text(content, encoding="utf-8")
+    (SITE_SRC / "index.md").write_text(content, encoding="utf-8")
 
 
 def main() -> None:
-    WEB.mkdir(parents=True, exist_ok=True)
+    reset_target(SITE_SRC)
+    SITE_SRC.mkdir(parents=True, exist_ok=True)
 
     for d in COPY_DIRS:
         src = ROOT / d
-        dst = WEB / d
-        reset_target(dst)
-        copy_tree(src, dst)
+        dst = SITE_SRC / d
+        shutil.copytree(src, dst)
 
     for f in COPY_FILES:
-        src = ROOT / f
-        dst = WEB / f
-        reset_target(dst)
-        shutil.copy2(src, dst)
+        shutil.copy2(ROOT / f, SITE_SRC / f)
 
     write_index()
-    print("Built web content under web/")
+    print("Built site source under .site-src/")
 
 
 if __name__ == "__main__":

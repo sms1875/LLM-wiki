@@ -9,3 +9,8 @@ __pycache__/
 
 # Local environment
 .env
+
+# Generated site artifacts
+.site-src/
+site/
+web/

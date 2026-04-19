@@ -21,9 +21,16 @@
 
 결과는 `wiki/lint/latest.md`와 `wiki/log.md`에 기록한다.
 
+## 4) PR Conflict Analysis
+병합 전 `python3 scripts/pr_conflict_analyze.py --target main` 실행:
+- 예상 충돌 파일 목록
+- 파일별 해결 가이드
+- 재검증 순서
 
-## 4) Publish (Web)
+## 5) Publish (Web)
 정적 웹 퍼블리시는 아래 순서로 진행:
-1. `python3 scripts/build_site.py`
+1. `python3 scripts/build_site.py` (로컬 확인용)
 2. `mkdocs build --strict`
 3. GitHub Actions Pages 배포
+
+참고: `.site-src/`, `site/`는 생성 산출물이므로 git 커밋 대상이 아니다.

@@ -4,7 +4,7 @@ site_url: https://<YOUR_GITHUB_USERNAME>.github.io/LLM-wiki/
 repo_url: https://github.com/<YOUR_GITHUB_USERNAME>/LLM-wiki
 
 use_directory_urls: false
-docs_dir: web
+docs_dir: .site-src
 site_dir: site
 
 theme:

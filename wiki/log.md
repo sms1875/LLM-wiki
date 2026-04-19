@@ -17,3 +17,8 @@ append-only 작업 로그.
 - issues: `0`
 - report: `wiki/lint/latest.md`
 - processed_at_utc: `2026-04-18 18:02:37Z`
+
+## [2026-04-19] lint | wiki health check
+- issues: `0`
+- report: `wiki/lint/latest.md`
+- processed_at_utc: `2026-04-19 01:01:11Z`
