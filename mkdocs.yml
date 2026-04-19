@@ -1,0 +1,33 @@
+site_name: LLM-wiki
+site_description: Raw→Wiki LLM knowledge base
+site_url: https://<YOUR_GITHUB_USERNAME>.github.io/LLM-wiki/
+repo_url: https://github.com/<YOUR_GITHUB_USERNAME>/LLM-wiki
+
+use_directory_urls: false
+docs_dir: web
+site_dir: site
+
+theme:
+  name: mkdocs
+
+nav:
+  - Home: index.md
+  - Repository README: README.md
+  - Wiki:
+    - Index: wiki/index.md
+    - Log: wiki/log.md
+    - Sources:
+      - Karpathy LLM Wiki Gist: wiki/sources/2026-04-04-karpathy-llm-wiki-gist.md
+    - Concepts:
+      - Raw-Wiki-Schema Architecture: wiki/concepts/raw-wiki-schema-architecture.md
+    - Entities:
+      - LLM Agent: wiki/entities/llm-agent.md
+    - Synthesis:
+      - 운영 원칙 초안: wiki/synthesis/operating-principles.md
+    - Lint Report: wiki/lint/latest.md
+  - Raw:
+    - Index: raw/index.md
+    - Karpathy Source Card: raw/sources/2026-04-04-karpathy-llm-wiki-gist.md
+  - Docs:
+    - Workflow: docs/WORKFLOW.md
+    - Review: docs/REVIEW.md
