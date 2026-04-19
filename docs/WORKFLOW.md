@@ -14,6 +14,7 @@
 
 ## 3) Lint
 정기적으로 `python3 scripts/lint_wiki.py  # 기본: .cache 에만 출력` 실행:
+정기적으로 `python3 scripts/lint_wiki.py` 실행:
 - 끊긴 상대 링크
 - 고아 페이지
 - frontmatter 누락
@@ -34,3 +35,4 @@
 3. GitHub Actions Pages 배포
 
 참고: `.site-src/`, `site/`는 생성 산출물이므로 git 커밋 대상이 아니다.
+결과는 `wiki/lint/latest.md`와 `wiki/log.md`에 기록한다.

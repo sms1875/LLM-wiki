@@ -7,6 +7,13 @@ Default mode is conflict-safe for PR workflows:
 
 Optional publishing mode:
 - `--write-wiki-report` also updates `wiki/lint/latest.md`.
+Checks:
+- Missing required frontmatter keys in wiki pages.
+- Broken relative markdown links.
+- Orphan wiki pages (no inbound links), excluding index/log/README/templates.
+- Duplicate source IDs in raw/index.md.
+
+Writes a report to wiki/lint/latest.md and appends a log entry to wiki/log.md.
 """
 
 from __future__ import annotations
@@ -27,6 +34,15 @@ WIKI_REPORT_DIR = WIKI_DIR / "lint"
 WIKI_REPORT_PATH = WIKI_REPORT_DIR / "latest.md"
 
 EXCLUDE_ORPHAN = {"index.md", "log.md", "README.md"}
+REPORT_DIR = WIKI_DIR / "lint"
+REPORT_PATH = REPORT_DIR / "latest.md"
+
+EXCLUDE_ORPHAN = {
+    "index.md",
+    "log.md",
+    "README.md",
+}
+
 REQUIRED_FRONTMATTER_KEYS = {"title", "type", "updated", "source_refs", "tags"}
 
 
@@ -94,6 +110,17 @@ def collect_issues() -> list[Issue]:
 
         for link in find_markdown_links(text):
             if link.startswith(("http://", "https://", "#")):
+                issues.append(
+                    Issue(
+                        level="WARN",
+                        code="missing_frontmatter_keys",
+                        path=rel,
+                        detail=f"missing: {', '.join(sorted(missing))}",
+                    )
+                )
+
+        for link in find_markdown_links(text):
+            if link.startswith("http://") or link.startswith("https://") or link.startswith("#"):
                 continue
             target = (page.parent / link).resolve()
             if target.suffix == "":
@@ -103,6 +130,14 @@ def collect_issues() -> list[Issue]:
                     inbound[target] += 1
             else:
                 issues.append(Issue("WARN", "broken_relative_link", rel, f"{link} -> missing"))
+                issues.append(
+                    Issue(
+                        level="WARN",
+                        code="broken_relative_link",
+                        path=rel,
+                        detail=f"{link} -> missing",
+                    )
+                )
 
     for page, count in inbound.items():
         p = Path(page)
@@ -112,6 +147,14 @@ def collect_issues() -> list[Issue]:
             continue
         if count == 0:
             issues.append(Issue("WARN", "orphan_page", p.relative_to(ROOT).as_posix(), "no inbound markdown links"))
+            issues.append(
+                Issue(
+                    level="WARN",
+                    code="orphan_page",
+                    path=p.relative_to(ROOT).as_posix(),
+                    detail="no inbound markdown links",
+                )
+            )
 
     if RAW_INDEX.exists():
         ids: list[str] = []
@@ -122,18 +165,32 @@ def collect_issues() -> list[Issue]:
             if len(cells) >= 2 and cells[0] != "date":
                 ids.append(cells[1])
         seen, dupes = set(), set()
+        seen = set()
+        dupes = set()
         for sid in ids:
             if sid in seen:
                 dupes.add(sid)
             seen.add(sid)
         for sid in sorted(dupes):
             issues.append(Issue("WARN", "duplicate_source_id", "raw/index.md", sid))
+            issues.append(
+                Issue(
+                    level="WARN",
+                    code="duplicate_source_id",
+                    path="raw/index.md",
+                    detail=sid,
+                )
+            )
 
     return issues
 
 
 def render_report(issues: list[Issue]) -> str:
     now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%SZ")
+def write_report(issues: list[Issue]) -> None:
+    REPORT_DIR.mkdir(parents=True, exist_ok=True)
+    now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%SZ")
+
     lines = [
         "# Wiki Lint Report",
         "",
@@ -150,6 +207,16 @@ def render_report(issues: list[Issue]) -> str:
     if not issues:
         lines.append("| PASS | none | - | no issues found |")
     return "\n".join(lines) + "\n"
+
+    for i in issues:
+        lines.append(
+            f"| {i.level} | {i.code} | {i.path.replace('|', '\\|')} | {i.detail.replace('|', '\\|')} |"
+        )
+
+    if not issues:
+        lines.append("| PASS | none | - | no issues found |")
+
+    REPORT_PATH.write_text("\n".join(lines) + "\n", encoding="utf-8")
 
 
 def append_log(issues: list[Issue]) -> None:
@@ -183,6 +250,21 @@ def main() -> None:
         append_log(issues)
 
     print(f"Lint complete. issues={len(issues)} report={CACHE_REPORT_PATH.relative_to(ROOT)}")
+    block = (
+        f"\n## [{day}] lint | wiki health check\n"
+        f"- issues: `{len(issues)}`\n"
+        f"- report: `wiki/lint/latest.md`\n"
+        f"- processed_at_utc: `{ts}`\n"
+    )
+    with WIKI_LOG.open("a", encoding="utf-8") as f:
+        f.write(block)
+
+
+def main() -> None:
+    issues = collect_issues()
+    write_report(issues)
+    append_log(issues)
+    print(f"Lint complete. issues={len(issues)} report={REPORT_PATH.relative_to(ROOT)}")
 
 
 if __name__ == "__main__":

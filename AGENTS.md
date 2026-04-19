@@ -7,6 +7,12 @@
 2. `wiki/`는 LLM이 관리하는 지식 레이어입니다. 요약, 개념, 엔티티, 비교, 종합 페이지를 갱신합니다.
 3. 변경 이력은 `wiki/log.md`에 append-only로 남깁니다.
 4. 웹 빌드 산출물(`.site-src/`, `site/`)은 생성물이며 git에 커밋하지 않습니다.
+4. 새 소스가 들어오면 최소 아래를 수행합니다.
+   - `raw/sources/`에 소스 카드 생성
+   - `wiki/sources/`에 소스 요약/주장/근거 정리
+   - 관련 `wiki/entities/`, `wiki/concepts/`, `wiki/synthesis/` 갱신
+   - `wiki/index.md` 갱신
+   - `wiki/log.md` 기록
 
 ## 1) 디렉토리 의미
 - `raw/`: 원본 링크/문서/파일 메타데이터 및 원문 위치
@@ -49,6 +55,13 @@ PR 병합 전:
 1. `python3 scripts/build_site.py`로 `.site-src/` 동기화
 2. `mkdocs build --strict`로 빌드 검증
 3. `.github/workflows/deploy-pages.yml` 파이프라인으로 GitHub Pages 배포
+- `python3 scripts/lint_wiki.py` 실행
+- 고아 페이지(링크 없음)
+- 상충 주장
+- 오래된 주장
+- 끊긴 링크
+- 누락된 핵심 개념
+을 점검하고 `wiki/log.md` 및 `wiki/lint/latest.md`를 기록
 
 ## 3) 문서 작성 규칙
 - 모든 wiki 문서는 markdown.
